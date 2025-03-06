@@ -1,3 +1,6 @@
+import { query } from "express";
+import { raw } from "mysql2";
+
 const { Sequelize } = require("sequelize");
 
 // Option 3: Passing parameters separately (other dialects)
@@ -6,6 +9,9 @@ const sequelize = new Sequelize("phongtro123", "root", null, {
 	port: "3308",
 	dialect: "mysql",
 	logging: false,
+	query: {
+		raw: true,
+	},
 });
 
 const connectDB = async () => {
