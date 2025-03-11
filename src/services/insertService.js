@@ -16,7 +16,7 @@ const insertDataService = async () => {
 		for (const data of dataBody) {
 			const postId = uuidv4();
 			const attributesId = uuidv4();
-			const labelCode = generateCode(4);
+			const labelCode = generateCode(data?.header?.class?.classType);
 			const userId = uuidv4();
 			const imagesId = uuidv4();
 			const overviewId = uuidv4();
@@ -24,7 +24,7 @@ const insertDataService = async () => {
 			await db.Post.create({
 				id: postId,
 				title: data?.header?.title,
-				star: data?.header?.start,
+				star: data?.header?.star,
 				labelCode,
 				address: data?.header?.address,
 				attributesId,
@@ -48,9 +48,14 @@ const insertDataService = async () => {
 				image: JSON.stringify(data?.images),
 			});
 
-			await db.Label.create({
-				code: labelCode,
-				value: data?.header?.class?.classType,
+			await db.Label.findOrCreate({
+				where: {
+					code: labelCode,
+				},
+				defaults: {
+					code: labelCode,
+					value: data?.header?.class?.classType,
+				},
 			});
 
 			await db.Overview.create({
@@ -85,11 +90,11 @@ const insertDataService = async () => {
 				).content,
 				zalo: data?.contact?.content.find((i) => i.name === "Zalo")
 					.content,
+
 				password: bcrypt.hashSync("123", 10),
 			});
 		}
 
-		// ✅ Return message after loop completes
 		return { message: "Done" };
 	} catch (error) {
 		return {

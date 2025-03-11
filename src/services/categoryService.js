@@ -5,6 +5,7 @@ const getCategoriesService = async () => {
 	try {
 		const navigates = await db.Category.findAll({
 			raw: true,
+			attributes: ["code", "value"],
 		});
 
 		return navigates;
