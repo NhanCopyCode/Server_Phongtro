@@ -5,11 +5,11 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 require("dotenv").config();
 import generateCode from "../utils/generateCode";
-// import chothuecanho from "../../data/chothuecanho.json";
-// import chothuematbang from "../../data/chothuematbang.json";
-// import nhachothue from '../../data/nhachothue.json';
-import chothuephongtro from '../../data/chothuephongtro.json';
-const dataBody = chothuephongtro.body;
+// import data from "../../data/chothuecanho.json";
+// import data from "../../data/chothuematbang.json";
+// import data from '../../data/nhachothue.json';
+import data from '../../data/chothuephongtro.json';
+const dataBody = data.body;
 
 const insertDataService = async () => {
 	try {
