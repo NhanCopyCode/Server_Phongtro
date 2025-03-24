@@ -9,9 +9,21 @@ const insertData = async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			errorCode: -1,
-			message: "Fail at authController!" + error,
+			message: "Fail at insertController!" + error,
 		});
 	}
 };
 
-export { insertData };
+const insertPriceAndAcreage = async (req, res) => {
+	try {
+		const response = await insertService.createPricesAndAcreage();
+		return res.status(201).json(response);
+	} catch (error) {
+		return res.status(500).json({
+			errorCode: -1,
+			message: "Fail at insertController: " + error,
+		})
+	}
+}
+
+export { insertData, insertPriceAndAcreage };

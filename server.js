@@ -5,6 +5,7 @@ import initRoutes from "./src/routes";
 import connectDB from "./src/config/connectDB";
 import { getPostLimit } from "./src/services/postService";
 
+
 const app = express();
 app.use(
 	cors({
