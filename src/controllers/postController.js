@@ -16,7 +16,7 @@ const getPostLimit = async (req, res) => {
 	const { offset, ...query } = req.query;
 	try {
 		const response = await postService.getPostLimit(offset, query);
-
+		console.log('response:', response)
 		return res.status(200).json(response);
 	} catch (error) {
 		return {
@@ -38,4 +38,15 @@ const getPostById = async (req, res) => {
 	}
 };
 
-export { getAllPost, getPostLimit, getPostById };
+const getNewPost = async (req, res) => {
+	try {
+		const response = await postService.getNewPostService();
+		return res.status(200).json(response);
+	} catch (error) {
+		return {
+			message: "Error at postController file: " + error,
+		};
+	}
+}
+
+export { getAllPost, getPostLimit, getPostById, getNewPost };

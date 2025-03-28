@@ -86,7 +86,7 @@ const getPostByIdService = async (postId) => {
 				{
 					model: db.User,
 					as: "user",
-					attributes: ["id", "name", "phone", "zalo","createdAt"],
+					attributes: ["id", "name", "phone", "zalo", "createdAt"],
 				},
 			],
 			attributes: [
@@ -118,7 +118,6 @@ const getPostByIdService = async (postId) => {
 		return {
 			message: "Get post successfully!",
 			data: response,
-
 		};
 	} catch (error) {
 		return {
@@ -159,4 +158,51 @@ const filterPost = async (codeFilter) => {
 	}
 };
 
-export { getPostService, getPostLimit, filterPost, getPostByIdService };
+const getNewPostService = async () => {
+	try {
+		const response = await db.Post.findAll({
+			raw: true,
+			nest: true,
+			include: [
+				{ model: db.Image, as: "images", attributes: ["image"] },
+				{
+					model: db.Attribute,
+					as: "attributes",
+					attributes: ["price", "acreage", "published", "hashtag"],
+				},
+				{
+					model: db.User,
+					as: "user",
+					attributes: ["name", "phone", "zalo"],
+				},
+			],
+			attributes: [
+				"id",
+				"title",
+				"star",
+				"address",
+				"description",
+				"createdAt",
+			],
+			order: [["createdAt", "DESC"]],
+			limit: 5,
+		});
+
+		return {
+			message: "Get new post successfully!",
+			data: response,
+		};
+	} catch (error) {
+		return {
+			message: "Error at post service file: " + error,
+		};
+	}
+};
+
+export {
+	getPostService,
+	getPostLimit,
+	filterPost,
+	getPostByIdService,
+	getNewPostService,
+};
