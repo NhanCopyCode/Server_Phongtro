@@ -13,7 +13,7 @@ const initRoutes = (app) => {
 	app.use("/api/v1/posts", postRouter);
 	app.use("/api/v1/price", priceRouter);
 	app.use("/api/v1/acreage", acreageRouter);
-	app.use("/api/v1/province", provinceRouter);
+	app.use("/api/v1/provinces", provinceRouter);
 
 	return app.use("/", (req, res) => {
 		return res.send("Server is running...");

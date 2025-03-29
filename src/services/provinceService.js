@@ -1,7 +1,10 @@
 import db from "../models"
 const getAllProvinceService = async() => {
     try {
-        const response = await db.Province.findAll();
+        const response = await db.Province.findAll({
+            raw: true,
+            attributes: ['code', 'value']
+        });
 
         return response;
     } catch (error) {
