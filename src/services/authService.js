@@ -32,6 +32,12 @@ const registerService = async ({ name, password, phone }) => {
 				? "Register successfully!"
 				: "Phone number already in use!!",
 			token: token || null,
+			user: {
+				id: response[0].id,
+				phone: response[0].phone,
+				name: response[0].name,
+				createdAr: response[0].createdAt,
+			},
 		};
 	} catch (error) {
 		return {
@@ -46,6 +52,7 @@ const loginService = async ({ phone, password }) => {
 		// check phone number exist
 		const isExistingUser = await db.User.findOne({
 			where: { phone },
+			attributes: ["name", "phone", "id", "password", "createdAt"],
 		});
 
 		if (!isExistingUser) {
@@ -77,10 +84,12 @@ const loginService = async ({ phone, password }) => {
 		);
 
 		if (token) {
+			const { password, ...userData } = isExistingUser.toJSON();
 			return {
 				errorCode: 0,
 				message: "Login successfully",
 				token: token,
+				user: userData,
 			};
 		}
 	} catch (error) {

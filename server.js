@@ -4,9 +4,10 @@ import cors from "cors";
 import initRoutes from "./src/routes";
 import connectDB from "./src/config/connectDB";
 import { getPostLimit } from "./src/services/postService";
-
+import morgan from "morgan";
 
 const app = express();
+app.use(morgan("dev"));
 app.use(
 	cors({
 		origin: process.env.CLIENT_URL,
