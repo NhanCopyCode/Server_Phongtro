@@ -7,6 +7,7 @@ import { getPostLimit } from "./src/services/postService";
 import morgan from "morgan";
 
 const app = express();
+app.use("/uploads", express.static("uploads"))
 app.use(morgan("dev"));
 app.use(
 	cors({

@@ -17,4 +17,5 @@ const getAllPricesService = async () => {
 	}
 };
 
+
 export { getAllPricesService };

@@ -1,5 +1,8 @@
 import { Op } from "sequelize";
 import db from "../models";
+import { v4 as uuidv4 } from "uuid";
+import getPriceCodeByPrice from "../utils/getPriceCodeByPrice";
+import getAreaCodeByArea from "../utils/getAreaCodeByArea";
 
 const getPostService = async () => {
 	try {
@@ -23,7 +26,6 @@ const getPostService = async () => {
 			offset: 0,
 			limit: 10,
 		});
-		console.log("all post: ", response);
 		return {
 			message: "Successful all post",
 			data: response,
@@ -199,10 +201,83 @@ const getNewPostService = async () => {
 	}
 };
 
+const createPostService = async (data, files) => {
+	try {
+		const {
+			title,
+			description,
+			name,
+			phone,
+			priceCode,
+			categoryCode,
+			areaCode,
+			provinceCode,
+			address,
+			priceNumber,
+			areaNumber,
+		} = data;
+
+		// Multer adds `files` array
+
+		if (
+			!title ||
+			!description ||
+			!name ||
+			!phone ||
+			!files ||
+			files.length < 6 ||
+			!priceCode ||
+			!categoryCode ||
+			!areaCode ||
+			!provinceCode ||
+			!address
+		) {
+			return {
+				errorCode: 1,
+				message: "Thiếu thông tin bắt buộc hoặc không đủ hình ảnh",
+			};
+		}
+
+		const imagePaths = files.map((file) => file.path.replace(/\\/g, "/"));
+		const resolvedPriceCode = getPriceCodeByPrice(priceCode);
+		const resolvedAreaCode = getAreaCodeByArea(areaCode);
+		// Sample create (adjust to your DB/model)
+		const newPost = await db.Post.create({
+			id: uuidv4(),
+			userId: uuidv4(),
+			title,
+			description,
+			name,
+			phone,
+			priceCode: resolvedPriceCode,
+			categoryCode,
+			areaCode: resolvedAreaCode,
+			provinceCode,
+			address,
+			images: JSON.stringify(imagePaths),
+			priceNumber,
+			areaNumber,
+		});
+
+		return {
+			errorCode: 0,
+			message: "Đăng bài thành công!",
+			data: newPost,
+		};
+	} catch (error) {
+		console.log("Error in createPost:", error);
+		return {
+			errorCode: -1,
+			message: "Lỗi server khi tạo bài đăng: " + error,
+		};
+	}
+};
+
 export {
 	getPostService,
 	getPostLimit,
 	filterPost,
 	getPostByIdService,
 	getNewPostService,
+	createPostService,
 };
