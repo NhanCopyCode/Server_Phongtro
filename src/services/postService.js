@@ -3,6 +3,8 @@ import db from "../models";
 import { v4 as uuidv4 } from "uuid";
 import getPriceCodeByPrice from "../utils/getPriceCodeByPrice";
 import getAreaCodeByArea from "../utils/getAreaCodeByArea";
+import { insertImageService } from "./imageService";
+require("dotenv").config();
 
 const getPostService = async () => {
 	try {
@@ -58,6 +60,7 @@ const getPostLimit = async (offset = 0, query) => {
 				},
 			],
 			attributes: ["id", "title", "star", "address", "description"],
+			order: [["createdAt", "DESC"]],
 			offset: offset * +process.env.LIMIT,
 			limit: +process.env.LIMIT,
 		});
@@ -215,6 +218,7 @@ const createPostService = async (data, files) => {
 			address,
 			priceNumber,
 			areaNumber,
+			userId
 		} = data;
 
 		// Multer adds `files` array
@@ -238,13 +242,18 @@ const createPostService = async (data, files) => {
 			};
 		}
 
-		const imagePaths = files.map((file) => file.path.replace(/\\/g, "/"));
+		const imagePaths = files.map((file) => process.env.SERVER_URI + "/" + file.path.replace(/\\/g, "/"));
 		const resolvedPriceCode = getPriceCodeByPrice(priceCode);
 		const resolvedAreaCode = getAreaCodeByArea(areaCode);
+		const imagesId = uuidv4();
+
+		
+		insertImageService(JSON.stringify(imagePaths), imagesId);
+
 		// Sample create (adjust to your DB/model)
 		const newPost = await db.Post.create({
 			id: uuidv4(),
-			userId: uuidv4(),
+			userId,
 			title,
 			description,
 			name,
@@ -254,7 +263,7 @@ const createPostService = async (data, files) => {
 			areaCode: resolvedAreaCode,
 			provinceCode,
 			address,
-			images: JSON.stringify(imagePaths),
+			imagesId,
 			priceNumber,
 			areaNumber,
 		});
