@@ -4,6 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import getPriceCodeByPrice from "../utils/getPriceCodeByPrice";
 import getAreaCodeByArea from "../utils/getAreaCodeByArea";
 import { insertImageService } from "./imageService";
+import { insertAttributeService } from "./attributeService";
+import { insertLabelService } from "./labelService";
+import formatRentPrice from "../utils/formatRentPrice";
+import generateCode from "../utils/generateCode";
 require("dotenv").config();
 
 const getPostService = async () => {
@@ -216,9 +220,7 @@ const createPostService = async (data, files) => {
 			areaCode,
 			provinceCode,
 			address,
-			priceNumber,
-			areaNumber,
-			userId
+			userId,
 		} = data;
 
 		// Multer adds `files` array
@@ -242,20 +244,43 @@ const createPostService = async (data, files) => {
 			};
 		}
 
-		const imagePaths = files.map((file) => process.env.SERVER_URI + "/" + file.path.replace(/\\/g, "/"));
+		const imagePaths = files.map(
+			(file) =>
+				process.env.SERVER_URI + "/" + file.path.replace(/\\/g, "/")
+		);
 		const resolvedPriceCode = getPriceCodeByPrice(priceCode);
 		const resolvedAreaCode = getAreaCodeByArea(areaCode);
 		const imagesId = uuidv4();
+		const attributesId = uuidv4();
+		const labelId = uuidv4();
+		const labelCode = generateCode(address);
 
-		
+		const dataAttribute = {
+			id: attributesId,
+			price: formatRentPrice(priceCode),
+			acreage: areaCode + "m2",
+			published: new Date().toLocaleDateString(),
+		};
+		const dataLabel = {
+			id: labelId,
+			code: labelCode,
+			value: address,
+		};
+
 		insertImageService(JSON.stringify(imagePaths), imagesId);
+		insertAttributeService(dataAttribute);
+		insertLabelService(dataLabel);
+
+		const descriptionArray = JSON.stringify(description.split("\n"));
 
 		// Sample create (adjust to your DB/model)
 		const newPost = await db.Post.create({
 			id: uuidv4(),
 			userId,
+			attributesId,
+			labelCode,
 			title,
-			description,
+			description: descriptionArray,
 			name,
 			phone,
 			priceCode: resolvedPriceCode,
@@ -264,8 +289,6 @@ const createPostService = async (data, files) => {
 			provinceCode,
 			address,
 			imagesId,
-			priceNumber,
-			areaNumber,
 		});
 
 		return {
@@ -282,6 +305,97 @@ const createPostService = async (data, files) => {
 	}
 };
 
+const getPostByUserIdService = async (userId) => {
+	try {
+		if (!userId) {
+			return {
+				err: 1,
+				msg: "Missing userId parameter",
+			};
+		}
+		const response = await db.Post.findAndCountAll({
+			raw: true,
+			nest: true,
+			where: { userId },
+			include: [
+				{ model: db.Image, as: "images", attributes: ["image"] },
+				{
+					model: db.Attribute,
+					as: "attributes",
+					attributes: ["price", "acreage", "published", "hashtag"],
+				},
+				{
+					model: db.User,
+					as: "user",
+					attributes: ["name", "phone", "zalo"],
+				},
+				{
+					model: db.Category,
+					as: "category",
+					attributes: ["code", "value"],
+				},
+			],
+			attributes: ["id", "title", "star", "address", "description"],
+			order: [["createdAt", "DESC"]],
+		});
+		return {
+			err: 0,
+			msg: "OK",
+			data: response.rows,
+			count: response.count,
+		};
+	} catch (error) {
+		console.log("Error in getPostByUserIdService:", error);
+		return {
+			err: -1,
+			msg: "Failed to fetch posts",
+			error: error.message,
+		};
+	}
+};
+
+const findPostByTitle = async (title, userId) => {
+	try {
+		const response = await db.Post.findAndCountAll({
+			raw: true,
+			nest: true,
+			where: { userId, title: {
+				[Op.like] : `%${title}%`
+			} },
+			include: [
+				{ model: db.Image, as: "images", attributes: ["image"] },
+				{
+					model: db.Attribute,
+					as: "attributes",
+					attributes: ["price", "acreage", "published", "hashtag"],
+				},
+				{
+					model: db.User,
+					as: "user",
+					attributes: ["name", "phone", "zalo"],
+				},
+				{
+					model: db.Category,
+					as: "category",
+					attributes: ["code", "value"],
+				},
+			],
+			attributes: ["id", "title", "star", "address", "description"],
+			order: [["createdAt", "DESC"]],
+		});
+
+		return {
+			errorCode: 0,
+			message: "Successfully get post by title",
+			data: response.rows,
+		};
+	} catch (error) {
+		return {
+			message: "Error at post service file: " + error,
+		};
+	}
+};
+
 export {
 	getPostService,
 	getPostLimit,
@@ -289,4 +403,6 @@ export {
 	getPostByIdService,
 	getNewPostService,
 	createPostService,
+	getPostByUserIdService,
+	findPostByTitle,
 };

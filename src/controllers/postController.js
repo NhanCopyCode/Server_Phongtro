@@ -63,4 +63,41 @@ const createPost = async (req, res) => {
 	}
 };
 
-export { getAllPost, getPostLimit, getPostById, getNewPost, createPost };
+const getPostByUserId = async (req, res) => {
+	const { userId } = req.params;
+	console.log('userId:', userId)
+
+	try {
+		const response = await postService.getPostByUserIdService(userId);
+
+		return res.status(200).json(response);
+	} catch (error) {
+		return {
+			message: "Error at post controller file: " + error,
+		}
+	}
+}
+
+const findPostByTitle = async (req, res) => {
+	const { userId, title} = req.params;
+
+	try {
+		const response = await postService.findPostByTitle(title, userId);
+
+		return res.status(200).json(response);
+	} catch (error) {
+		return {
+			message: "Error at post controller file: " + error,
+		};
+	}
+}
+
+export {
+	getAllPost,
+	getPostLimit,
+	getPostById,
+	getNewPost,
+	createPost,
+	getPostByUserId,
+	findPostByTitle,
+};

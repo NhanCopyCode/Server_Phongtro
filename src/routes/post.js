@@ -21,5 +21,7 @@ postRouter.get("/filter/:id", postController.getPostById);
 postRouter.get("/limit", postController.getPostLimit);
 postRouter.get("/newPost", postController.getNewPost);
 postRouter.post("/create", upload.array("images", 10) , postController.createPost);
+postRouter.get("/getPostByUserId/:userId", postController.getPostByUserId)
+postRouter.get("/findPostByTitle/:userId/:title", postController.findPostByTitle)
 
 export default postRouter;
